@@ -12,12 +12,23 @@ class BluetoothLeDevice
   end
 
   def con
+    Open3.popen3("hciconfig") do |stdin, stdout, stderr, wait_thr|
+      puts stdout.read
+    end
+
     cmd = "gatttool -b #{@mac_address} --interactive"
     Open3.popen3(cmd) do |stdin, stdout, stderr, wait_thr|
-      puts stdout
+      puts "Opened gatttool"
+      puts "PID: #{wait_thr.pid}"
+      stdin.puts "quit"
+      stdin.close
+      puts stdout.read
+      stdout.close
+      stderr.close
+
+      #stdin.puts "connect"
     end
   end
-
 end
 
 class Radbeacon
@@ -49,5 +60,4 @@ if __FILE__ == $0
   my_ble_device = BluetoothLeDevice.new('00:07:80:15:74:5B')
   my_ble_device.display
   my_ble_device.con
-
 end
