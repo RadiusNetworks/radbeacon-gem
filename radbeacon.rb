@@ -4,25 +4,20 @@ require 'timeout'
 require 'pty'
 require 'expect'
 
-class LeScan
+class LeScanner
+
   def scan(duration)
-    timeout = 5
-    cmd = "hcitool lescan"
-    PTY.spawn(cmd) do |output, input, pid|
-      output.expect(/LE Scan .../, timeout)
-      output.eachline do |line|
-      result = line.scan(/^([A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}) (.*)$/)
-
-      end
-
-      _, status = Process.waitpid2(pid)
-      if status.success?
-        puts "Yay!"
-      else
-        puts "Boo :-("
+    devices = Array.new
+    scan_output = `sudo hcitool lescan & sleep #{duration}; sudo kill -2 $!`
+    scan_output.each_line do |line|
+      result = line.scan(/^([A-F0-9:]{15}[A-F0-9]{2}) (.*)$/)
+      if !result.empty?
+        mac_addr = result[0][0]
+        name = result[0][1]
+        devices << result[0]
       end
     end
-    return nil
+    devices
   end
 
 end
@@ -238,28 +233,35 @@ end
 if __FILE__ == $0
   my_beacon = Radbeacon.new('James\'s Test Beacon', '842AF9C4-08F5-11E3-9282-F23C91AEC05E', '707', '707', '-66', '0x0f', '0x8000', '0000', '1234')
   my_other_beacon = Radbeacon.new('James\'s Test Beacon', '842AF9C4-08F5-11E3-9282-F23C91AEC05E', '707', '707', '-66', '0x0f', '0x8000', '1234', '0000')
-  my_beacon.display
+  #my_beacon.display
 
   my_ble_device = BluetoothLeDevice.new('00:07:80:15:74:5B')
-  my_ble_device.display
-  puts "Updating PIN..."
-  if my_ble_device.update_pin(my_beacon)
-    puts "Update PIN Success!"
-  end
-  puts "Factory Reset..."
-  if my_ble_device.factory_reset(my_other_beacon)
-    puts "Factory Reset Success!"
-  end
-  puts "Updating Params..."
-  if my_ble_device.update_params(my_beacon)
-    puts "Update Params Success!"
-  end
-  puts "Booting to DFU..."
-  if my_ble_device.boot_to_dfu(my_beacon)
-    puts "Boot to DFU Success!"
-  end
-  puts "Locking..."
-  if my_ble_device.lock(my_beacon)
-    puts "Lock Success!"
+  #my_ble_device.display
+  #do_actions
+
+  devices = LeScanner.new.scan(2)
+  puts devices.inspect
+
+  def do_actions
+    puts "Updating PIN..."
+    if my_ble_device.update_pin(my_beacon)
+      puts "Update PIN Success!"
+    end
+    puts "Factory Reset..."
+    if my_ble_device.factory_reset(my_other_beacon)
+      puts "Factory Reset Success!"
+    end
+    puts "Updating Params..."
+    if my_ble_device.update_params(my_beacon)
+      puts "Update Params Success!"
+    end
+    puts "Booting to DFU..."
+    if my_ble_device.boot_to_dfu(my_beacon)
+      puts "Boot to DFU Success!"
+    end
+    puts "Locking..."
+    if my_ble_device.lock(my_beacon)
+      puts "Lock Success!"
+    end
   end
 end
