@@ -88,31 +88,26 @@ class BluetoothLeDevice
       "#{GATT_MINOR} #{beacon.minor_to_bytes}", "#{GATT_POWER} #{beacon.power_to_bytes}", "#{GATT_TXPOWER} 0f",
       "#{GATT_INTERVAL} 8000", "#{GATT_ACTION} #{GATT_ACTION_UPDATE_ADV}", "#{GATT_PIN} #{beacon.pin_to_bytes}"]
       result = con(update_params_commands)
-      return result
   end
 
   def update_pin(beacon)
     update_pin_commands = ["#{GATT_NEW_PIN} #{beacon.new_pin_to_bytes}", "#{GATT_ACTION} #{GATT_ACTION_UPDATE_PIN}", "#{GATT_PIN} #{beacon.pin_to_bytes}"]
     result = con(update_pin_commands)
-    return result
   end
 
   def factory_reset(beacon)
     reset_commands = ["#{GATT_ACTION} #{GATT_ACTION_FACTORY_RESET}", "#{GATT_PIN} #{beacon.pin_to_bytes}"]
     result = con(reset_commands)
-    return result
   end
 
   def boot_to_dfu(beacon)
     dfu_commands = ["#{GATT_ACTION} #{GATT_ACTION_DFU}", "#{GATT_PIN} #{beacon.pin_to_bytes}"]
     result = con(dfu_commands)
-    return result
   end
 
   def lock(beacon)
     lock_commands = ["#{GATT_ACTION} #{GATT_ACTION_LOCK}", "#{GATT_PIN} #{beacon.pin_to_bytes}"]
     result = con(lock_commands)
-    return result
   end
 
   def con(commands)
@@ -141,7 +136,7 @@ class BluetoothLeDevice
         puts "Boo :-("
       end
     end
-    return result
+    result
   end
 
 end
@@ -162,7 +157,6 @@ class Radbeacon
 
   def name_to_bytes
     bytes = self.name.unpack('H*')[0]
-    return bytes
   end
 
   def uuid_to_bytes
@@ -171,7 +165,6 @@ class Radbeacon
     else
       bytes = nil
     end
-    return bytes
   end
 
   def major_to_bytes
@@ -180,7 +173,6 @@ class Radbeacon
     else
       bytes = nil
     end
-    return bytes
   end
 
   def minor_to_bytes
@@ -189,7 +181,6 @@ class Radbeacon
     else
       bytes = nil
     end
-    return bytes
   end
 
   def power_to_bytes
@@ -198,7 +189,6 @@ class Radbeacon
     else
       bytes = nil
     end
-    return bytes
   end
 
   def pin_to_bytes
@@ -208,7 +198,6 @@ class Radbeacon
       puts "Invalid PIN"
       bytes = nil
     end
-    return bytes
   end
 
   def new_pin_to_bytes
@@ -218,7 +207,6 @@ class Radbeacon
       puts "Invalid PIN"
       bytes = nil
     end
-    return bytes
   end
 
   def display
