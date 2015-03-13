@@ -6,34 +6,43 @@ require 'expect'
 
 class LeScanner
 
-  def scan(duration)
+  def scan(duration = 5)
     devices = Array.new
     scan_output = `sudo hcitool lescan & sleep #{duration}; sudo kill -2 $!`
     scan_output.each_line do |line|
       result = line.scan(/^([A-F0-9:]{15}[A-F0-9]{2}) (.*)$/)
       if !result.empty?
         device = BluetoothLeDevice.new(result[0][0], result[0][1])
-        devices << device
+        if !devices.find {|s| s.mac_address == device.mac_address}
+          devices << device
+        end
       end
     end
     devices
   end
 
-  def radbeacon_scan(duration)
-    connectable_devices = Array.new
+  def radbeacon_scan(duration = 5)
+    radbeacons = Array.new
     devices = self.scan(duration)
     devices.each do |device|
       if device.can_connect?
         device.is_connectable = true
-        connectable_devices << device
+        if device.is_radbeacon?
+          device.is_radbeacon = true
+          radbeacons << device
+        end
       end
     end
-    connectable_devices
+    radbeacons
   end
 
 end
 
 class BluetoothLeDevice
+
+  def self.scan(duration = 5)
+    LeScanner.new.scan(duration)
+  end
 
   ## Define GATT characteristic constants
   # Generic Access Profile
@@ -167,6 +176,25 @@ class BluetoothLeDevice
     end
     result
   end
+
+  def is_radbeacon?
+    result = false
+    timeout = 0.5
+    cmd = "gatttool -b #{@mac_address} --interactive"
+    PTY.spawn(cmd) do |output, input, pid|
+      output.expect(/\[LE\]>/)
+      input.puts "connect"
+      if output.expect(/Connection successful/, timeout)
+        input.puts "char-read-hnd 0x0003"
+        if output.expect(/Characteristic value\/descriptor: 52 61 64 42 65 61 63 6f 6e 20 55 53 42/, timeout)
+          result = true
+        end
+      end
+      input.puts "quit"
+    end
+    result
+  end
+
 end
 
 class Radbeacon
@@ -278,14 +306,10 @@ if __FILE__ == $0
   end
 
   #do_actions
-  devices = LeScanner.new.scan(1)
+  devices = LeScanner.new.scan(2)
   puts "Discovered " + devices.count.to_s + " BLE devices"
-  connectable_devices = LeScanner.new.radbeacon_scan(1)
-  puts "Discovered " + connectable_devices.count.to_s + " connectable BLE devices"
-
-  #puts devices.inspect
-
-  #my_ble_device = BluetoothLeDevice.new('00:07:80:15:74:5B', 'RadBeacon USB')
-  #puts "My BLE device can connect? --> " + my_ble_device.is_connectable.to_s
+  radbeacons = LeScanner.new.radbeacon_scan(10)
+  puts "Discovered " + radbeacons.count.to_s + " RadBeacons"
+  p radbeacons
 
 end
