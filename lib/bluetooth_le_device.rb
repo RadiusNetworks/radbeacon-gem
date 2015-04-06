@@ -11,7 +11,7 @@ class BluetoothLeDevice
 
   attr_accessor :mac_address, :name, :characteristics, :is_connectable
   def initialize(mac_address, name)
-    @mac_address = mac_address
+    self.mac_address = mac_address
     @name = name
     @is_connectable = false
     @characteristics = Hash.new
