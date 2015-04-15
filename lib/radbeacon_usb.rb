@@ -1,6 +1,7 @@
-require 'bluetooth_le_device'
+require_relative 'bluetooth_le_device'
+require_relative 'radbeacon_utils'
 
-class RadbeaconUsb extends BluetoothLeDevice
+class RadbeaconUsb < BluetoothLeDevice
 
   ## Define GATT characteristic constants
   # Generic Access Profile
@@ -51,79 +52,105 @@ class RadbeaconUsb extends BluetoothLeDevice
   ADVERTISING_RATE_VALUES = {"2" => "E002", "4" => "5001", "6" => "E000", "8" => "9000", "10" => "6000",
     "12" => "5000", "14" => "3500", "16" => "3000", "18" => "2500", "20" => "2000"}
 
+  attr_reader :mac_address, :errors, :dev_model, :dev_id, :dev_version
+  attr_accessor :dev_name, :uuid, :major, :minor, :power, :tx_power, :adv_interval
 
-  def update_params(beacon)
-    update_params_commands = ["#{GATT_DEV_NAME} #{beacon.name_to_bytes}",
-      "#{GATT_UUID} #{beacon.uuid_to_bytes}", "#{GATT_MAJOR} #{beacon.major_to_bytes}",
-      "#{GATT_MINOR} #{beacon.minor_to_bytes}", "#{GATT_POWER} #{beacon.power_to_bytes}", "#{GATT_TXPOWER} 0f",
-      "#{GATT_INTERVAL} 8000", "#{GATT_ACTION} #{GATT_ACTION_UPDATE_ADV}", "#{GATT_PIN} #{beacon.pin_to_bytes}"]
+  def initialize(device)
+    self.errors = []
+    self.mac_address = device.mac_address
+    self.dev_model = RadbeaconUtils.bytes_to_text(device.values[GATT_DEV_MODEL])
+    self.dev_id =  RadbeaconUtils.bytes_to_text(device.values[GATT_DEV_ID])
+    self.dev_version =  RadbeaconUtils.bytes_to_text(device.values[GATT_FWVERSION])
+    self.dev_name =  RadbeaconUtils.bytes_to_text(device.values[GATT_DEV_NAME])
+    self.uuid =  RadbeaconUtils.bytes_to_uuid(device.values[GATT_UUID])
+    self.major =  RadbeaconUtils.bytes_to_major_minor(device.values[GATT_MAJOR])
+    self.minor = RadbeaconUtils.bytes_to_major_minor(device.values[GATT_MINOR])
+    self.power = RadbeaconUtils.bytes_to_power(device.values[GATT_POWER])
+    self.tx_power = device.values[GATT_TXPOWER]
+    self.adv_interval = device.values[GATT_INTERVAL]
+  end
+
+  def valid?
+
+  end
+
+  def save!(pin)
+    @errors = []
+    update_params_commands = ["#{GATT_DEV_NAME} #{RadbeaconUtils.name_to_bytes(self.dev_name)}",
+      "#{GATT_UUID} #{RadbeaconUtils.uuid_to_bytes(self.uuid)}", "#{GATT_MAJOR} #{RadbeaconUtils.major_minor_to_bytes(self.major)}",
+      "#{GATT_MINOR} #{RadbeaconUtils.major_minor_to_bytes(self.minor)}", "#{GATT_POWER} #{RadbeaconUtils.power_to_bytes(self.power)}", "#{GATT_TXPOWER} 0f",
+      "#{GATT_INTERVAL} 8000", "#{GATT_ACTION} #{GATT_ACTION_UPDATE_ADV}", "#{GATT_PIN} #{RadbeaconUtils.pin_to_bytes(pin)}"]
       result = con(update_params_commands)
   end
 
-  def update_pin(beacon)
-    update_pin_commands = ["#{GATT_NEW_PIN} #{beacon.new_pin_to_bytes}", "#{GATT_ACTION} #{GATT_ACTION_UPDATE_PIN}", "#{GATT_PIN} #{beacon.pin_to_bytes}"]
+  def change_pin(new_pin, old_pin)
+    @errors = []
+    update_pin_commands = ["#{GATT_NEW_PIN} #{RadbeaconUtils.pin_to_bytes(new_pin)}", "#{GATT_ACTION} #{GATT_ACTION_UPDATE_PIN}",
+      "#{GATT_PIN} #{RadbeaconUtils.pin_to_bytes(old_pin)}"]
     result = con(update_pin_commands)
   end
 
-  def factory_reset(beacon)
-    reset_commands = ["#{GATT_ACTION} #{GATT_ACTION_FACTORY_RESET}", "#{GATT_PIN} #{beacon.pin_to_bytes}"]
+  def factory_reset(pin)
+    @errors = []
+    reset_commands = ["#{GATT_ACTION} #{GATT_ACTION_FACTORY_RESET}", "#{GATT_PIN} #{RadbeaconUtils.pin_to_bytes(pin)}"]
     result = con(reset_commands)
-  end
-
-  def boot_to_dfu(beacon)
-    dfu_commands = ["#{GATT_ACTION} #{GATT_ACTION_DFU}", "#{GATT_PIN} #{beacon.pin_to_bytes}"]
-    result = con(dfu_commands)
-  end
-
-  def lock(beacon)
-    lock_commands = ["#{GATT_ACTION} #{GATT_ACTION_LOCK}", "#{GATT_PIN} #{beacon.pin_to_bytes}"]
-    result = con(lock_commands)
-  end
-
-  def con(commands)
-    result = false
-    timeout = 5
-    cmd = "gatttool -b #{@mac_address} --interactive"
-    PTY.spawn(cmd) do |output, input, pid|
-      output.expect(/\[LE\]>/)
-      input.puts "connect"
-      output.expect(/Connection successful/, timeout)
-      commands.each do |cmd|
-        cmd = "char-write-req #{cmd}"
-        puts "~~~> #{cmd}"
-        input.puts cmd
-        output.expect(/Characteristic value was written successfully/, timeout)
-      end
-      input.puts "char-read-hnd 0x32"
-      output.expect(/Characteristic value\/descriptor: 00 00 00 00/, timeout) do
-        result = true
-      end
-      input.puts "quit"
-      _, status = Process.waitpid2(pid)
-      if status.success?
-        puts "Yay!"
-      else
-        puts "Boo :-("
-      end
-    end
+    #self.fetch_params
     result
   end
 
+  def boot_to_dfu(pin)
+    @errors = []
+    dfu_commands = ["#{GATT_ACTION} #{GATT_ACTION_DFU}", "#{GATT_PIN} #{RadbeaconUtils.pin_to_bytes(pin)}"]
+    result = con(dfu_commands)
+  end
 
-  def is_radbeacon?
+  def lock(pin)
+    @errors = []
+    lock_commands = ["#{GATT_ACTION} #{GATT_ACTION_LOCK}", "#{GATT_PIN} #{RadbeaconUtils.pin_to_bytes(pin)}"]
+    result = con(lock_commands)
+  end
+
+  private
+
+  attr_writer :mac_address, :errors, :dev_model, :dev_id, :dev_version
+
+  def con(commands)
     result = false
     timeout = 0.5
-    cmd = "gatttool -b #{@mac_address} --interactive"
+    cmd = "gatttool -b #{self.mac_address} --interactive"
     PTY.spawn(cmd) do |output, input, pid|
       output.expect(/\[LE\]>/)
       input.puts "connect"
       if output.expect(/Connection successful/, timeout)
-        input.puts "char-read-hnd 0x0003"
-        if output.expect(/Characteristic value\/descriptor: 52 61 64 42 65 61 63 6f 6e 20 55 53 42/, timeout)
-          result = true
+        commands.each do |cmd|
+          cmd = "char-write-req #{cmd}"
+          input.puts cmd
+          if output.expect(/Characteristic value was written successfully/, timeout)
+            result = true
+          else
+            @errors << "Write parameters failed: #{cmd}"
+            result = false
+            break
+          end
         end
+        if result
+          input.puts "char-read-hnd #{GATT_RESULT}"
+          if output.expect(/Characteristic value\/descriptor: 00 00 00 00/, timeout)
+            result = true
+          else
+            @errors << "Invalid PIN"
+            result = false
+          end
+        end
+      else
+        @errors << "Connection failed"
       end
       input.puts "quit"
+      _, status = Process.waitpid2(pid)
+      if !status.success?
+        result = false
+        @errors << "Process failed to exit properly"
+      end
     end
     result
   end
