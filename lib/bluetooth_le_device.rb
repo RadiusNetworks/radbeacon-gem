@@ -10,17 +10,20 @@ class BluetoothLeDevice
     self.is_connectable = false
     self.characteristics = Array.new
     self.values = Hash.new
-    if self.can_connect?
-      self.is_connectable = true
-      self.discover_characteristics
-      self.char_values
-    end
   end
 
   def display
     puts "MAC Address: " + self.mac_address + " Name: " + self.name + " Can connect: " + self.is_connectable.to_s
   end
 
+  def fetch_characteristics
+    if self.can_connect?
+      self.is_connectable = true
+      self.discover_characteristics
+      self.char_values
+    end
+  end
+  
   def can_connect?
     result = false
     timeout = 0.5

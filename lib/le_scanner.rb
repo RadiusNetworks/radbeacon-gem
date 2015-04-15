@@ -1,13 +1,13 @@
 require_relative 'bluetooth_le_device'
 
 class LeScanner
-  attr_accessor :uuid, :duration, :results, :scan
+  attr_accessor :duration
 
   def initialize(duration = 5)
     self.duration = duration
   end
 
-  def scan
+  def passive_scan
     devices = Array.new
     scan_output = `sudo hcitool lescan & sleep #{self.duration}; sudo kill -2 $!`
     scan_output.each_line do |line|
@@ -20,6 +20,14 @@ class LeScanner
           devices << device
         end
       end
+    end
+    devices
+  end
+
+  def scan
+    devices = self.passive_scan
+    devices.each do |dev|
+      dev.fetch_characteristics
     end
     devices
   end
