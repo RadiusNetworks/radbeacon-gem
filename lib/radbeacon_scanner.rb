@@ -2,6 +2,7 @@ require_relative 'le_scanner'
 
 class RadbeaconScanner < LeScanner
 
+  C_DEVICE_NAME = "0x0003"
   RADBEACON_USB = "52 61 64 42 65 61 63 6f 6e 20 55 53 42"
 
   def scan
@@ -10,7 +11,6 @@ class RadbeaconScanner < LeScanner
     devices.each do |dev|
       radbeacon = radbeacon_check(dev)
       if radbeacon
-        puts "Device is a RadBeacon USB"
         radbeacons << radbeacon
       end
     end
@@ -19,7 +19,7 @@ class RadbeaconScanner < LeScanner
 
   def radbeacon_check(device)
     radbeacon = nil
-    case device.values['0x0003']
+    case device.values[C_DEVICE_NAME]
     when RADBEACON_USB
       radbeacon = RadbeaconUsb.new(device)
     end
