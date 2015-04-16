@@ -9,12 +9,7 @@ module RadbeaconUtils
   end
 
   def self.uuid_to_bytes(uuid)
-    if uuid.match(/^[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}$/)
-      bytes = uuid.gsub(/-/, '')
-    else
-      bytes = nil
-    end
-    bytes
+    bytes = uuid.gsub(/-/, '')
   end
 
   def self.bytes_to_uuid(bytes)
@@ -22,12 +17,7 @@ module RadbeaconUtils
   end
 
   def self.major_minor_to_bytes(value)
-    if value.to_i.between?(0, 65535)
-      bytes = sprintf("%04x", value.to_i)
-    else
-      bytes = nil
-    end
-    bytes
+    bytes = sprintf("%04x", value.to_i)
   end
 
   def self.bytes_to_major_minor(bytes)
@@ -35,12 +25,7 @@ module RadbeaconUtils
   end
 
   def self.power_to_bytes(power)
-    if power.to_i.between?(-127, -1)
-      bytes = sprintf("%x", power.to_i + 256)
-    else
-      bytes = nil
-    end
-    bytes
+    bytes = sprintf("%x", power.to_i + 256)
   end
 
   def self.bytes_to_power(bytes)
@@ -48,13 +33,7 @@ module RadbeaconUtils
   end
 
   def self.pin_to_bytes(pin)
-    if pin.match(/^[0-9]{4}$/)
-      bytes = pin.unpack('H*')[0]
-    else
-      # Invalid PIN
-      bytes = nil
-    end
-    bytes
+    bytes = pin.unpack('H*')[0]
   end
 
 end
