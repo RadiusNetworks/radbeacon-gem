@@ -60,32 +60,32 @@ class RadbeaconUsb < BluetoothLeDevice
   attr_accessor :dev_name, :uuid, :major, :minor, :power, :tx_power, :adv_rate, :beacon_type
 
   def initialize(device)
-    self.errors = []
-    self.mac_address = device.mac_address
-    self.dev_model = RadbeaconUtils.bytes_to_text(device.values[GATT_DEV_MODEL])
-    self.dev_id =  RadbeaconUtils.bytes_to_text(device.values[GATT_DEV_ID])
-    self.dev_version =  RadbeaconUtils.bytes_to_text(device.values[GATT_FWVERSION])
-    self.dev_name =  RadbeaconUtils.bytes_to_text(device.values[GATT_DEV_NAME])
-    self.uuid =  RadbeaconUtils.bytes_to_uuid(device.values[GATT_UUID])
-    self.major =  RadbeaconUtils.bytes_to_major_minor(device.values[GATT_MAJOR])
-    self.minor = RadbeaconUtils.bytes_to_major_minor(device.values[GATT_MINOR])
-    self.power = RadbeaconUtils.bytes_to_power(device.values[GATT_POWER])
-    self.tx_power = TRANSMIT_POWER_VALUES.key(device.values[GATT_TXPOWER])
-    self.adv_rate = ADVERTISING_RATE_VALUES.key(device.values[GATT_INTERVAL].delete(' '))
-    self.beacon_type = BEACON_TYPES.key(device.values[GATT_BCTYPE])
+    @errors = []
+    @mac_address = device.mac_address
+    @dev_model = RadbeaconUtils.bytes_to_text(device.values[GATT_DEV_MODEL])
+    @dev_id =  RadbeaconUtils.bytes_to_text(device.values[GATT_DEV_ID])
+    @dev_version =  RadbeaconUtils.bytes_to_text(device.values[GATT_FWVERSION])
+    @dev_name =  RadbeaconUtils.bytes_to_text(device.values[GATT_DEV_NAME])
+    @uuid =  RadbeaconUtils.bytes_to_uuid(device.values[GATT_UUID])
+    @major =  RadbeaconUtils.bytes_to_major_minor(device.values[GATT_MAJOR])
+    @minor = RadbeaconUtils.bytes_to_major_minor(device.values[GATT_MINOR])
+    @power = RadbeaconUtils.bytes_to_power(device.values[GATT_POWER])
+    @tx_power = TRANSMIT_POWER_VALUES.key(device.values[GATT_TXPOWER])
+    @adv_rate = ADVERTISING_RATE_VALUES.key(device.values[GATT_INTERVAL].delete(' '))
+    @beacon_type = BEACON_TYPES.key(device.values[GATT_BCTYPE])
   end
 
   def valid?
     @errors = []
     checks = {}
-    checks['device name'] = self.dev_name.length <= 20
-    checks['UUID'] = self.uuid.match(/^[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}$/)
-    checks['major value'] = self.major.to_i.between?(0, 65535)
-    checks['minor value'] = self.minor.to_i.between?(0, 65535)
-    checks['measured power value'] = self.power.to_i.between?(-127, -1)
-    checks['transmit power'] = TRANSMIT_POWER_VALUES.has_key?(self.tx_power)
-    checks['advertising rate'] = ADVERTISING_RATE_VALUES.has_key?(self.adv_rate)
-    checks['beacon type'] = BEACON_TYPES.has_key?(self.beacon_type)
+    checks['device name'] = @dev_name.length <= 20
+    checks['UUID'] = @uuid.match(/^[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}$/)
+    checks['major value'] = @major.to_i.between?(0, 65535)
+    checks['minor value'] = @minor.to_i.between?(0, 65535)
+    checks['measured power value'] = @power.to_i.between?(-127, -1)
+    checks['transmit power'] = TRANSMIT_POWER_VALUES.has_key?(@tx_power)
+    checks['advertising rate'] = ADVERTISING_RATE_VALUES.has_key?(@adv_rate)
+    checks['beacon type'] = BEACON_TYPES.has_key?(@beacon_type)
     failed_checks = checks.select{|key, value| !value}
     if failed_checks == {}
       result = true
@@ -100,11 +100,11 @@ class RadbeaconUsb < BluetoothLeDevice
 
   def save!(pin)
     if self.valid?
-      update_params_commands = ["#{GATT_DEV_NAME} #{RadbeaconUtils.text_to_bytes(self.dev_name)}",
-        "#{GATT_UUID} #{RadbeaconUtils.uuid_to_bytes(self.uuid)}", "#{GATT_MAJOR} #{RadbeaconUtils.major_minor_to_bytes(self.major)}",
-        "#{GATT_MINOR} #{RadbeaconUtils.major_minor_to_bytes(self.minor)}", "#{GATT_POWER} #{RadbeaconUtils.power_to_bytes(self.power)}",
-        "#{GATT_TXPOWER} #{TRANSMIT_POWER_VALUES[self.tx_power]}", "#{GATT_INTERVAL} #{ADVERTISING_RATE_VALUES[self.adv_rate]}",
-        "#{GATT_BCTYPE} #{BEACON_TYPES[self.beacon_type]}", "#{GATT_ACTION} #{GATT_ACTION_UPDATE_ADV}", "#{GATT_PIN} #{RadbeaconUtils.pin_to_bytes(pin)}"]
+      update_params_commands = ["#{GATT_DEV_NAME} #{RadbeaconUtils.text_to_bytes(@dev_name)}",
+        "#{GATT_UUID} #{RadbeaconUtils.uuid_to_bytes(@uuid)}", "#{GATT_MAJOR} #{RadbeaconUtils.major_minor_to_bytes(@major)}",
+        "#{GATT_MINOR} #{RadbeaconUtils.major_minor_to_bytes(@minor)}", "#{GATT_POWER} #{RadbeaconUtils.power_to_bytes(@power)}",
+        "#{GATT_TXPOWER} #{TRANSMIT_POWER_VALUES[@tx_power]}", "#{GATT_INTERVAL} #{ADVERTISING_RATE_VALUES[@adv_rate]}",
+        "#{GATT_BCTYPE} #{BEACON_TYPES[@beacon_type]}", "#{GATT_ACTION} #{GATT_ACTION_UPDATE_ADV}", "#{GATT_PIN} #{RadbeaconUtils.pin_to_bytes(pin)}"]
       result = con(update_params_commands)
     else
       result = false
@@ -141,20 +141,20 @@ class RadbeaconUsb < BluetoothLeDevice
   attr_writer :mac_address, :errors, :dev_model, :dev_id, :dev_version
 
   def defaults
-    self.dev_name = "RadBeacon USB"
-    self.uuid = "2F234454-CF6D-4A0F-ADF2-F4911BA9FFA6"
-    self.major = 1
-    self.minor = 1
-    self.power = -66
-    self.tx_power = 3
-    self.adv_rate = 10
-    self.beacon_type = "dual"
+    @dev_name = "RadBeacon USB"
+    @uuid = "2F234454-CF6D-4A0F-ADF2-F4911BA9FFA6"
+    @major = 1
+    @minor = 1
+    @power = -66
+    @tx_power = 3
+    @adv_rate = 10
+    @beacon_type = "dual"
   end
 
   def con(commands)
     @errors = []
     result = false
-    cmd = "gatttool -b #{self.mac_address} --interactive"
+    cmd = "gatttool -b #{@mac_address} --interactive"
     PTY.spawn(cmd) do |output, input, pid|
       output.expect(/\[LE\]>/)
       input.puts "connect"
