@@ -98,7 +98,7 @@ class RadbeaconUsb < BluetoothLeDevice
     result
   end
 
-  def save!(pin)
+  def save(pin)
     if self.valid?
       update_params_commands = ["#{GATT_DEV_NAME} #{RadbeaconUtils.text_to_bytes(@dev_name)}",
         "#{GATT_UUID} #{RadbeaconUtils.uuid_to_bytes(@uuid)}", "#{GATT_MAJOR} #{RadbeaconUtils.major_minor_to_bytes(@major)}",
@@ -112,13 +112,13 @@ class RadbeaconUsb < BluetoothLeDevice
     result
   end
 
-  def change_pin!(new_pin, old_pin)
+  def change_pin(new_pin, old_pin)
     update_pin_commands = ["#{GATT_NEW_PIN} #{RadbeaconUtils.pin_to_bytes(new_pin)}", "#{GATT_ACTION} #{GATT_ACTION_UPDATE_PIN}",
       "#{GATT_PIN} #{RadbeaconUtils.pin_to_bytes(old_pin)}"]
     result = con(update_pin_commands)
   end
 
-  def factory_reset!(pin)
+  def factory_reset(pin)
     reset_commands = ["#{GATT_ACTION} #{GATT_ACTION_FACTORY_RESET}", "#{GATT_PIN} #{RadbeaconUtils.pin_to_bytes(pin)}"]
     result = con(reset_commands)
     if result
@@ -127,12 +127,12 @@ class RadbeaconUsb < BluetoothLeDevice
     result
   end
 
-  def boot_to_dfu!(pin)
+  def boot_to_dfu(pin)
     dfu_commands = ["#{GATT_ACTION} #{GATT_ACTION_DFU}", "#{GATT_PIN} #{RadbeaconUtils.pin_to_bytes(pin)}"]
     result = con(dfu_commands)
   end
 
-  def lock!(pin)
+  def lock(pin)
     lock_commands = ["#{GATT_ACTION} #{GATT_ACTION_LOCK}", "#{GATT_PIN} #{RadbeaconUtils.pin_to_bytes(pin)}"]
     result = con(lock_commands)
   end

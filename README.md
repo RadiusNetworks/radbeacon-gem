@@ -19,10 +19,10 @@ All identifiers and other parameters are attributes on the `RadbeaconUsb` class:
 
 `:dev_name, :uuid, :major, :minor, :power, :tx_power, :adv_rate, :beacon_type`
 
-To make a config change, simply assign one of these attributes to the desired value and call the `save!` method with the beacon's PIN (as a string).
+To make a config change, simply assign one of these attributes to the desired value and call the `save()` method with the beacon's PIN (as a string).
 
 ```
-radbeacon.save!(pin)
+radbeacon.save(pin)
 ```
 
 For example:
@@ -36,7 +36,7 @@ radbeacon.power = -66
 radbeacon.tx_power = 3
 radbeacon.adv_rate = 10
 radbeacon.beacon_type = "dual"
-radbeacon.save!('0000')
+radbeacon.save('0000')
 ```
 
 # Other Actions
@@ -45,22 +45,22 @@ All other RadBeacon actions are available as well
 
 ##### Change PIN
 ```
-radbeacon.change_pin!(new_pin, old_pin)
+radbeacon.change_pin(new_pin, old_pin)
 ```
 
 ##### Factory Reset
 ```
-radbeacon.factory_reset!(pin)
+radbeacon.factory_reset(pin)
 ```
 
 ##### Boot to DFU
 ```
-radbeacon.boot_to_dfu!(pin)
+radbeacon.boot_to_dfu(pin)
 ```
 
 ##### Lock
 ```
-radbeacon.lock!(pin)
+radbeacon.lock(pin)
 ```
 
 # Dependencies
