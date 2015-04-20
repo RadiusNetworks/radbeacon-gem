@@ -55,6 +55,9 @@ module Radbeacon
     ## Timeout length for GATT commands
     TIMEOUT = 0.5
 
+    ## Valid UUID pattern
+    VALID_UUID = /^[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}$/
+
     attr_reader :mac_address, :errors, :dev_model, :dev_id, :dev_version
     attr_accessor :dev_name, :uuid, :major, :minor, :power, :tx_power, :adv_rate, :beacon_type
 
@@ -76,23 +79,17 @@ module Radbeacon
 
     def valid?
       @errors = []
-      checks = {}
-      checks['device name'] = @dev_name.length <= 20
-      checks['UUID'] = @uuid.match(/^[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}$/)
-      checks['major value'] = @major.to_i.between?(0, 65535)
-      checks['minor value'] = @minor.to_i.between?(0, 65535)
-      checks['measured power value'] = @power.to_i.between?(-127, -1)
-      checks['transmit power'] = TRANSMIT_POWER_VALUES.has_key?(@tx_power)
-      checks['advertising rate'] = ADVERTISING_RATE_VALUES.has_key?(@adv_rate)
-      checks['beacon type'] = BEACON_TYPES.has_key?(@beacon_type)
-      failed_checks = checks.select{|key, value| !value}
-      if failed_checks.empty?
+      @errors << "Invalid device name" unless @dev_name.length <= 20
+      @errors << "Invalid UUID" unless @uuid.match(VALID_UUID)
+      @errors << "Invalid major value" unless @major.to_i.between?(0, 65535)
+      @errors << "Invalid minor value" unless @minor.to_i.between?(0, 65535)
+      @errors << "Invalid measured power value" unless @power.to_i.between?(-127, -1)
+      @errors << "Invalid transmit power" unless TRANSMIT_POWER_VALUES.has_key?(@tx_power)
+      @errors << "Invalid advertising rate" unless ADVERTISING_RATE_VALUES.has_key?(@adv_rate)
+      @errors << "Invalid beacon type" unless BEACON_TYPES.has_key?(@beacon_type)
+      if @errors.empty?
         true
       else
-        failed_checks.each do |key, value|
-          @errors << "Invalid #{key}"
-        end
-
         false
       end
     end
