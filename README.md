@@ -2,7 +2,7 @@
 
 # What's all this then?
 
-A ruby gem (almost) that provides RadBeacon scanning and configuring capabilities on a linux machine.  Currently the only supported beacon type is RadBeacon USB.  
+A ruby gem that provides RadBeacon scanning and configuring capabilities on a linux machine.  Currently the only supported beacon type is RadBeacon USB.  
 
 # Scanning
 

@@ -1,10 +1,11 @@
-require 'le_scanner'
+require 'spec_helper'
+require 'radbeacon'
 
-describe LeScanner do
+RSpec.describe Radbeacon::LeScanner do
   describe '#scan' do
-    scanner = LeScanner.new(5)
+    scanner = Radbeacon::LeScanner.new(5)
     devices = scanner.scan
-    
+
     it "scans for beacons" do
       expect(devices.length).to be > 0
     end
