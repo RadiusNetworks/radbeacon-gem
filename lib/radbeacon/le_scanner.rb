@@ -7,9 +7,27 @@ module Radbeacon
       @duration = duration
     end
 
+    def scan_command
+      rout, wout = IO.pipe
+      scan_command_str = "sudo hcitool lescan"
+      pid = Process.spawn(scan_command_str, :out => wout)
+      begin
+        Timeout.timeout(@duration) do
+          Process.wait(pid)
+        end
+      rescue Timeout::Error
+        puts 'Scan process not finished in time, killing it'
+        Process.kill('INT', pid)
+      end
+      wout.close
+      scan_output = rout.readlines.join("")
+      rout.close
+      scan_output
+    end
+
     def passive_scan
       devices = Array.new
-      scan_output = `sudo hcitool lescan & sleep #{@duration}; sudo kill -2 $!`
+      scan_output = self.scan_command
       scan_output.each_line do |line|
         result = line.scan(/^([A-F0-9:]{15}[A-F0-9]{2}) (.*)$/)
         if !result.empty?
