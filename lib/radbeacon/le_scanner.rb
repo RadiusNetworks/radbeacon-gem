@@ -16,7 +16,6 @@ module Radbeacon
           Process.wait(pid)
         end
       rescue Timeout::Error
-        puts 'Scan process not finished in time, killing it'
         Process.kill('INT', pid)
       end
       wout.close
