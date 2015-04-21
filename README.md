@@ -6,18 +6,25 @@ A ruby gem that provides RadBeacon scanning and configuring capabilities on a li
 
 # Scanning
 
-The `RadbeaconScanner` class has a `scan` method that returns an array of configurable RadBeacons (in the form of `RadbeaconUsb` objects).  The duration of a scan (default = 5 seconds) is an attribute that can be set during initialization.  
+The `Radbeacon::Scanner` class has a `scan` method that returns an array of configurable RadBeacons (in the form of `Radbeacon::Usb` objects).  The duration of a scan (default = 5 seconds) is an attribute that can be set during initialization.  
 
 ```
-scanner = RadbeaconScanner.new(10)
+scanner = Radbeacon::Scanner.new(10)
 radbeacons = scanner.scan
 ```
 
 #Configuring
 
-All identifiers and other parameters are attributes on the `RadbeaconUsb` class:
+All identifiers and other parameters are attributes on the `Radbeacon::Usb` class:
 
-`:dev_name, :uuid, :major, :minor, :power, :tx_power, :adv_rate, :beacon_type`
+- `dev_name`
+- `uuid`
+- `major`
+- `minor`
+- `power`
+- `tx_power`
+- `adv_rate`
+- `beacon_type`
 
 To make a config change, simply assign one of these attributes to the desired value and call the `save()` method with the beacon's PIN (as a string).
 
