@@ -16,7 +16,7 @@ module Radbeacon
           Process.wait(pid)
         end
       rescue Timeout::Error
-        Process.kill('INT', pid)
+        Process.kill('TERM', pid)
       end
       wout.close
       scan_output = rout.readlines.join("")
