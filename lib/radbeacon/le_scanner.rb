@@ -31,7 +31,7 @@ module Radbeacon
 
     def passive_scan
       devices = Array.new
-      if @options[:hcitool_duration] == true
+      if @options[:enable_hcitool_duration] == true
         scan_output = self.scan_command_duration
       else
         scan_output = self.scan_command

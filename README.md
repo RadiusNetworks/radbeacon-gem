@@ -23,10 +23,10 @@ An (optional) `options` hash is available as an attribute on the `Scanner` class
   options[:filter_mac] = ["11:22:33:44:55:66", "55:66:77:88:99:00"]
   ```
 
-- `:hcitool_duration` - Use the custom hcitool-duration binary that adds a duration option to the `hcitool lescan` command.  To use this you must copy the new hcitool binary over the standard one (located at `/usr/bin/hcitool` on the ZBOX for example).
+- `:enable_hcitool_duration` - Use the custom hcitool-duration binary that adds a duration option to the `hcitool lescan` command.  To use this you must copy the new hcitool binary over the standard one (located at `/usr/bin/hcitool` on the ZBOX for example).
 
   ```
-  options[:hcitool_duration] = true
+  options[:enable_hcitool_duration] = true
   ```
 
 #Configuring
