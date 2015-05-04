@@ -16,6 +16,11 @@ module Radbeacon
       radbeacons
     end
 
+    def fetch(mac_address)
+      dev = BluetoothLeDevice.new(mac_address, nil)
+      radbeacon_check(dev) if dev.fetch_characteristics
+    end
+
     def radbeacon_check(device)
       radbeacon = nil
       case device.values[C_DEVICE_NAME]
