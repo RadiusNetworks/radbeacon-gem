@@ -1,10 +1,11 @@
 module Radbeacon
 
   class LeScanner
-    attr_accessor :duration
+    attr_accessor :duration, :options
 
     def initialize(duration = 5)
       @duration = duration
+      @options = {}
     end
 
     def scan_command
@@ -24,17 +25,28 @@ module Radbeacon
       scan_output
     end
 
+    def scan_command_duration
+      `sudo hcitool lescan --duration #{@duration}`
+    end
+
     def passive_scan
       devices = Array.new
-      scan_output = self.scan_command
+      if @options[:enable_hcitool_duration] == true
+        scan_output = self.scan_command_duration
+      else
+        scan_output = self.scan_command
+      end
       scan_output.each_line do |line|
         result = line.scan(/^([A-F0-9:]{15}[A-F0-9]{2}) (.*)$/)
         if !result.empty?
           mac_address = result[0][0]
           name = result[0][1]
           if !devices.find {|s| s.mac_address == mac_address}
-            device = BluetoothLeDevice.new(mac_address, name)
-            devices << device
+            filter_mac = @options[:filter_mac]
+            if !filter_mac or (filter_mac.include?(mac_address) if filter_mac.is_a?(Array))
+              device = BluetoothLeDevice.new(mac_address, name)
+              devices << device
+            end
           end
         end
       end

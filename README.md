@@ -13,6 +13,22 @@ scanner = Radbeacon::Scanner.new(10)
 radbeacons = scanner.scan
 ```
 
+#### Scan Options
+
+An (optional) `options` hash is available as an attribute on the `Scanner` class.  Below are the following options that can be used:
+
+- `:filter_mac` - Specify an array of MAC addresses that the scanner will filter for when doing a scan
+
+  ```
+  options[:filter_mac] = ["11:22:33:44:55:66", "55:66:77:88:99:00"]
+  ```
+
+- `:enable_hcitool_duration` - Use the custom hcitool-duration binary that adds a duration option to the `hcitool lescan` command.  To use this you must copy the new hcitool binary over the standard one (located at `/usr/bin/hcitool` on the ZBOX for example).
+
+  ```
+  options[:enable_hcitool_duration] = true
+  ```
+
 #Configuring
 
 All identifiers and other parameters are attributes on the `Radbeacon::Usb` class:
