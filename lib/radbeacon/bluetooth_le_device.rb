@@ -56,7 +56,7 @@ module Radbeacon
       characteristics_command_str = "gatttool -b #{@mac_address} --characteristics 2>&1"
       pid = Process.spawn(characteristics_command_str, :out => wout)
       begin
-        Timeout.timeout(2) do
+        Timeout.timeout(5) do
           Process.wait(pid)
         end
       rescue Timeout::Error
