@@ -51,12 +51,27 @@ module Radbeacon
       result
     end
 
+    def characteristics_command
+      rout, wout = IO.pipe
+      characteristics_command_str = "gatttool -b #{@mac_address} --characteristics 2>&1"
+      pid = Process.spawn(characteristics_command_str, :out => wout)
+      begin
+        Timeout.timeout(2) do
+          Process.wait(pid)
+        end
+      rescue Timeout::Error
+        Process.kill('TERM', pid)
+      end
+      wout.close
+      characteristics_output = rout.readlines.join("")
+      rout.close
+      characteristics_output
+    end
+
     def discover_characteristics
       @errors = []
       result = false
-      output = ""
-      cmd = "gatttool -b #{@mac_address} --characteristics 2>&1"
-      output = `#{cmd}`
+      output = characteristics_command
       if output.strip != "Discover all characteristics failed: Internal application error: I/O"
         @characteristics = []
         output.each_line do |line|
