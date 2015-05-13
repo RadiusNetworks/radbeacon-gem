@@ -73,7 +73,7 @@ module Radbeacon
       @minor = bytes_to_major_minor(device.values[GATT_MINOR])
       @power = bytes_to_power(device.values[GATT_POWER])
       @tx_power = TRANSMIT_POWER_VALUES.key(device.values[GATT_TXPOWER])
-      @adv_rate = ADVERTISING_RATE_VALUES.key(device.values[GATT_INTERVAL].delete(' '))
+      @adv_rate = ADVERTISING_RATE_VALUES.key(device.values[GATT_INTERVAL].delete(' ')) if device.values[GATT_INTERVAL]
       @beacon_type = BEACON_TYPES.key(device.values[GATT_BCTYPE])
     end
 
