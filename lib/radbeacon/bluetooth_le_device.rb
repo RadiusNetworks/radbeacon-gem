@@ -110,8 +110,9 @@ module Radbeacon
             @characteristics.each do |char|
               input.puts "char-read-hnd #{char['value_handle']}"
               if output.expect(/Characteristic value\/descriptor: /, TIMEOUT)
-                value = output.expect(/^[0-9a-f\s]+\n/, TIMEOUT)
-                @values[char['value_handle']] = value.first.strip
+                if value = output.expect(/^[0-9a-f\s]+\n/, TIMEOUT)
+                  @values[char['value_handle']] = value.first.strip
+                end
               end
             end
             result = true
