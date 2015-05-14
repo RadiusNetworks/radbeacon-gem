@@ -5,15 +5,9 @@ module Radbeacon
     RADBEACON_USB = "52 61 64 42 65 61 63 6f 6e 20 55 53 42"
 
     def scan
-      radbeacons = Array.new
       devices = super
-      devices.each do |dev|
-        radbeacon = radbeacon_check(dev)
-        if radbeacon
-          radbeacons << radbeacon
-        end
-      end
-      radbeacons
+      radbeacons = devices.map { |dev| radbeacon_check(dev) }
+      radbeacons.compact
     end
 
     def fetch(mac_address)
@@ -25,7 +19,7 @@ module Radbeacon
       radbeacon = nil
       case device.values[C_DEVICE_NAME]
       when RADBEACON_USB
-        radbeacon = Usb.new(device)
+        radbeacon = Usb.create_if_valid(device)
       end
       radbeacon
     end
