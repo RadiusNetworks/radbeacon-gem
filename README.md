@@ -13,6 +13,12 @@ scanner = Radbeacon::Scanner.new(10)
 radbeacons = scanner.scan
 ```
 
+There is also a `fetch` method that returns a `Radbeacon::Usb` object for a given MAC address.
+
+```
+radbeacon = scanner.fetch("11:22:33:44:55:66")
+```
+
 #### Scan Options
 
 An (optional) `options` hash is available as an attribute on the `Scanner` class.  Below are the following options that can be used:
