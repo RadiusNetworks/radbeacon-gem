@@ -51,13 +51,38 @@ module Radbeacon
       result
     end
 
+    def characteristics_command
+      success = true
+      output = nil
+      rout, wout = IO.pipe
+      rerr, werr = IO.pipe
+      characteristics_command_str = "gatttool -b #{@mac_address} --characteristics"
+      pid = Process.spawn(characteristics_command_str, :out => wout, :err => werr)
+      begin
+        Timeout.timeout(5) do
+          Process.wait(pid)
+        end
+      rescue Timeout::Error
+        Process.kill('TERM', pid)
+        success = false
+      end
+      wout.close
+      werr.close
+      stdout = rout.readlines.join("")
+      stderr = rerr.readlines.join("")
+      rout.close
+      rerr.close
+      if success
+        output = [stdout, stderr].join("")
+      end
+      output
+    end
+
     def discover_characteristics
       @errors = []
       result = false
-      output = ""
-      cmd = "gatttool -b #{@mac_address} --characteristics 2>&1"
-      output = `#{cmd}`
-      if output.strip != "Discover all characteristics failed: Internal application error: I/O"
+      output = characteristics_command
+      if output && output.strip != "Discover all characteristics failed: Internal application error: I/O"
         @characteristics = []
         output.each_line do |line|
           result = line.scan(/^handle = (0x[a-f0-9]{4}), char properties = (0x[a-f0-9]{2}), char value handle = (0x[a-f0-9]{4}), uuid = ([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$/)
@@ -85,8 +110,9 @@ module Radbeacon
             @characteristics.each do |char|
               input.puts "char-read-hnd #{char['value_handle']}"
               if output.expect(/Characteristic value\/descriptor: /, TIMEOUT)
-                value = output.expect(/^[0-9a-f\s]+\n/, TIMEOUT)
-                @values[char['value_handle']] = value.first.strip
+                if value = output.expect(/^[0-9a-f\s]+\n/, TIMEOUT)
+                  @values[char['value_handle']] = value.first.strip
+                end
               end
             end
             result = true

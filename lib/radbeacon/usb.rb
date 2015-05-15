@@ -61,6 +61,15 @@ module Radbeacon
     attr_reader :mac_address, :errors, :dev_model, :dev_id, :dev_version
     attr_accessor :dev_name, :uuid, :major, :minor, :power, :tx_power, :adv_rate, :beacon_type
 
+    def self.create_if_valid(device)
+      # Check everything
+      required_attrs = [GATT_DEV_MODEL, GATT_DEV_ID, GATT_FWVERSION, GATT_DEV_NAME,
+        GATT_UUID, GATT_MAJOR, GATT_MINOR, GATT_POWER, GATT_TXPOWER, GATT_INTERVAL, GATT_BCTYPE]
+      if required_attrs.all? { |key| device.values[key] }
+        self.new(device)
+      end
+    end
+
     def initialize(device)
       @errors = []
       @mac_address = device.mac_address
