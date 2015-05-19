@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["support@radiusnetworks.com"]
 
   spec.summary       = %q{Provides RadBeacon (BLE Proximity Beacon) scanning and configuring capabilities on a linux machine.}
-  spec.homepage      = "www.radiusnetworks.com"
+  spec.homepage      = "http://www.radiusnetworks.com"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
