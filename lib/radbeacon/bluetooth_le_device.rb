@@ -1,5 +1,6 @@
 require 'pty'
 require 'expect'
+require 'timeout'
 
 module Radbeacon
   class BluetoothLeDevice
