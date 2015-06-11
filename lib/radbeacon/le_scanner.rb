@@ -1,3 +1,5 @@
+require 'timeout'
+
 module Radbeacon
 
   class LeScanner
