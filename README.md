@@ -1,5 +1,3 @@
-<img src="http://i.imgur.com/gI6paLj.jpg" style="float:left" height="200">
-
 # What's all this then?
 
 A ruby gem that provides RadBeacon scanning and configuring capabilities on a linux machine.  Currently the only supported beacon type is RadBeacon USB.  
