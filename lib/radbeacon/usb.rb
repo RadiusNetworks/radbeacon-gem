@@ -137,8 +137,11 @@ module Radbeacon
       con(lock_commands)
     end
 
-    private
+    protected
+
     attr_writer :mac_address, :errors, :dev_model, :dev_id, :dev_version
+
+    private
 
     def defaults
       @dev_name = "RadBeacon USB"

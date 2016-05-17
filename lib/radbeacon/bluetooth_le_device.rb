@@ -128,7 +128,7 @@ module Radbeacon
       result
     end
 
-    private
+  protected
 
     attr_writer :mac_address, :name, :is_connectable, :characteristics, :values, :errors
 
