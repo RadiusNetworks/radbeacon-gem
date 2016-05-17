@@ -157,8 +157,8 @@ module Radbeacon
     def con(commands)
       @errors = []
       result = false
-      cmd = "gatttool -b #{@mac_address} --interactive"
-      PTY.spawn(cmd) do |output, input, pid|
+      cmd_line = "gatttool -b #{@mac_address} --interactive"
+      PTY.spawn(cmd_line) do |output, input, pid|
         output.expect(/\[LE\]>/)
         input.puts "connect"
         if output.expect(/Connection successful/, TIMEOUT)
