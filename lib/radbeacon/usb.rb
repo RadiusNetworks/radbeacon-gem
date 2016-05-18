@@ -137,8 +137,11 @@ module Radbeacon
       con(lock_commands)
     end
 
-    private
+    protected
+
     attr_writer :mac_address, :errors, :dev_model, :dev_id, :dev_version
+
+    private
 
     def defaults
       @dev_name = "RadBeacon USB"
@@ -154,8 +157,8 @@ module Radbeacon
     def con(commands)
       @errors = []
       result = false
-      cmd = "gatttool -b #{@mac_address} --interactive"
-      PTY.spawn(cmd) do |output, input, pid|
+      cmd_line = "gatttool -b #{@mac_address} --interactive"
+      PTY.spawn(cmd_line) do |output, input, pid|
         output.expect(/\[LE\]>/)
         input.puts "connect"
         if output.expect(/Connection successful/, TIMEOUT)
